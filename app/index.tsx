@@ -1,55 +1,48 @@
-// app/index.tsx
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { LogIn, Map as MapIcon } from 'lucide-react-native';
+import React, { useEffect, useState } from 'react'; // Aggiunto useEffect
+import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+
+// Import Supabase Client
+import { supabase } from '../lib/superbase';
 
 // Import Componenti
-import MapView from '@/components/MapView'; // Il file MapView che abbiamo fatto
 import { CategoryFilter } from '@/components/CategoryFilter';
+import MapView from '@/components/MapView';
 
 // Dati e Helper
-import { Place, CATEGORY_CONFIG } from '@/types/places';
-
-// Dati di prova (Sostituisci poi con il tuo state globale o API)
-const INITIAL_PLACES: Place[] = [
-  {
-    id: '1',
-    name: 'Neon Bar Milano',
-    description: 'Distributore icos.',
-    lat: 45.4642,
-    lng: 9.1900,
-    categories: ['cigarettes'],
-    open_time: '18:00',
-    close_time: '02:00',
-    address: 'Via Dante 1, Milano',
-    image_url: 'https://images.unsplash.com/photo-1514362545857-3bc16549766b?auto=format&fit=crop&q=80',
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  },
-  {
-    id: '2',
-    name: 'Midnight Burger',
-    description: 'Tabaccaio dentro il locale.',
-    lat: 45.4660,
-    lng: 9.1920,
-    categories: ['cigarettes'],
-    open_time: '19:00',
-    close_time: '04:00',
-    address: 'Corso Vittorio Emanuele, Milano',
-    image_url: null,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  }
-];
+import { Place } from '@/types/places';
 
 export default function HomeScreen() {
   const router = useRouter();
   
   // Stati
-  const [places, setPlaces] = useState<Place[]>(INITIAL_PLACES);
+  const [places, setPlaces] = useState<Place[]>([]);
+  const [isLoading, setIsLoading] = useState(true); // Stato per il caricamento
   const [activeCategories, setActiveCategories] = useState<string[]>([]);
+
+  // 1. Caricamento dati dal Database
+  useEffect(() => {
+    fetchPlaces();
+  }, []);
+
+  const fetchPlaces = async () => {
+    try {
+      setIsLoading(true);
+      const { data, error } = await supabase
+        .from('places')
+        .select('*');
+
+      if (error) throw error;
+
+      setPlaces(data as Place[]);
+    } catch (error) {
+      console.error('Errore nel caricamento dei posti:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   // Logica Filtri
   const handleToggleCategory = (category: string) => {
@@ -60,22 +53,20 @@ export default function HomeScreen() {
     );
   };
 
-  // Filtra i luoghi
+  // Filtra i luoghi in base alle categorie attive
   const filteredPlaces = activeCategories.length > 0 
     ? places.filter(place => place.categories.some(cat => activeCategories.includes(cat)))
     : places;
 
-  // Logica "isPlaceOpen" (Semplificata per demo)
+  // Logica "isPlaceOpen"
   const isPlaceOpen = (place: Place): boolean => {
     const now = new Date();
     const currentHours = now.getHours();
-    const currentMinutes = now.getMinutes();
     
-    // Parsing molto semplice HH:MM
+    // Parsing HH:MM:SS (Supabase restituisce spesso il formato completo)
     const [openH] = place.open_time.split(':').map(Number);
     const [closeH] = place.close_time.split(':').map(Number);
     
-    // Logica base: se chiude dopo la mezzanotte (es. apre 18, chiude 02)
     if (closeH < openH) {
         return currentHours >= openH || currentHours < closeH;
     }
@@ -87,7 +78,6 @@ export default function HomeScreen() {
       
       {/* 1. NAVBAR */}
       <View style={styles.navbar}>
-        {/* Sinistra: Logo e Nome */}
         <View style={styles.logoContainer}>
           <View style={styles.logoIconBg}>
             <MapIcon size={20} color="#007AFF" />
@@ -95,17 +85,16 @@ export default function HomeScreen() {
           <Text style={styles.appName}>NightMap</Text>
         </View>
 
-        {/* Destra: Login Button */}
         <TouchableOpacity 
           style={styles.loginButton}
-          onPress={() => router.push('./admin/login')}
+          onPress={() => router.push('/admin/login')} // Corretto il path
         >
           <Text style={styles.loginText}>Admin</Text>
           <LogIn size={16} color="#94A3B8" style={{ marginLeft: 6 }} />
         </TouchableOpacity>
       </View>
 
-      {/* 2. FILTRI (Sub-header) */}
+      {/* 2. FILTRI */}
       <View style={styles.filterContainer}>
         <CategoryFilter 
           activeCategories={activeCategories}
@@ -113,12 +102,19 @@ export default function HomeScreen() {
         />
       </View>
 
-      {/* 3. MAPPA (Main Content) */}
+      {/* 3. MAPPA O CARICAMENTO */}
       <View style={styles.mapWrapper}>
-        <MapView 
-          places={filteredPlaces}
-          isPlaceOpen={isPlaceOpen}
-        />
+        {isLoading ? (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color="#007AFF" />
+            <Text style={{ marginTop: 10, color: '#94A3B8' }}>Cerco i posti...</Text>
+          </View>
+        ) : (
+          <MapView 
+            places={filteredPlaces}
+            isPlaceOpen={isPlaceOpen}
+          />
+        )}
       </View>
 
     </SafeAreaView>
