@@ -9,7 +9,7 @@ import { supabase } from '../lib/superbase';
 
 // Import Componenti
 import { CategoryFilter } from '@/components/CategoryFilter';
-import MapView from '@/components/MapView';
+import MapComponent from '../components/MapView';
 
 // Dati e Helper
 import { Place } from '@/types/places';
@@ -110,7 +110,7 @@ export default function HomeScreen() {
             <Text style={{ marginTop: 10, color: '#94A3B8' }}>Cerco i posti...</Text>
           </View>
         ) : (
-          <MapView 
+          <MapComponent
             places={filteredPlaces}
             isPlaceOpen={isPlaceOpen}
           />

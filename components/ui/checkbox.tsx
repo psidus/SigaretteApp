@@ -74,7 +74,7 @@ const styles = StyleSheet.create({
   }
 });
 
-export { Checkbox };
+export default Checkbox ;
 
 //COME USARE LA CHECKBOX:
 /* 

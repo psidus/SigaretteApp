@@ -14,14 +14,14 @@ import {
 import { supabase } from '../../lib/superbase';
 
 // UI Components
-import { MapView as MapComponent } from '../../components/MapView';
-import { Button } from '../../components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';
-import { Checkbox } from '../../components/ui/checkbox';
-import { Input } from '../../components/ui/input';
-import { Label } from '../../components/ui/label';
-import { Textarea } from '../../components/ui/textarea';
-import { CATEGORY_CONFIG, Place, PlaceCategory } from '../../types/places';
+import  MapComponent  from '../../components/MapView';
+import  Button from '../../components/ui/button';
+import {Card, CardContent, CardDescription, CardHeader, CardTitle}  from '../../components/ui/card';
+import  Checkbox  from '../../components/ui/checkbox';
+import  Input from '../../components/ui/input';
+import  Label from '../../components/ui/label';
+import  Textarea from '../../components/ui/textarea';
+import {CATEGORY_CONFIG, Place, PlaceCategory } from '../../types/places';
 
 interface FormData {
   name: string;
@@ -166,8 +166,8 @@ const AdminDashboard = () => {
   const handleMapSelection = (location: { lat: number; lng: number }) => {
     setFormData(prev => ({
       ...prev,
-      lat: location.lat.toString(),
-      lng: location.lng.toString(),
+      lat: location.latitude.toString(),
+      lng: location.longitude.toString(),
     }));
   };
 

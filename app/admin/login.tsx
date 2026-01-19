@@ -22,6 +22,14 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 // CORRETTO: Usa l'alias @ oppure il percorso relativo corretto
 import { supabase } from '../../lib/superbase';
 // Se questo ti da errore, prova: import { supabase } from '../../lib/supabase';
+console.log("DEBUG LOGIN COMPONENTS:", {
+  Button: !!Button,
+  Input: !!Input,
+  Label: !!Label,
+  Card: !!Card,
+  CardContent: !!CardContent,
+  CardHeader: !!CardHeader
+});
 
 interface AdminLoginProps {
   onBack?: () => void;

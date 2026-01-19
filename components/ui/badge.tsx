@@ -84,7 +84,7 @@ const Badge: React.FC<BadgeProps> = ({
   );
 };
 
-export { Badge };
+export default Badge;
 
 //COME USARE IL BADGE:
 /*import React from 'react';
